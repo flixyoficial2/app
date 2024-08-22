@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/estilos.css">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet"> 
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css">
+    <title> series </title>
+    <style>
+        /* Estilos para la barra de navegación */
+        .header {
+            background-color: #0e0d0d;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #fff;
+        }
+
+        .logo {
+            flex: 1;
+            text-align: center;
+        }
+
+        .logo img {
+            max-width: 100px;
+            max-height: 100px;
+        }
+
+        .secciones-btn {
+            background-color: #e50914;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        /* Estilos para el buscador */
+        .search-container {
+            position: relative;
+        }
+
+        .search-input {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 20px;
+            font-size: 16px;
+            transition: width 0.4s ease-in-out, opacity 0.4s ease-in-out;
+            width: 0;
+            opacity: 0;
+            background-color: #333;
+            color: #fff;
+            outline: none;
+        }
+
+        .search-container:hover .search-input,
+        .search-input:focus {
+            width: 210px;
+            opacity: 1;
+        }
+
+        .search-icon {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #ee0b0b;
+        }
+
+        /* Estilos para las sugerencias de búsqueda */
+        .search-results {
+            position: absolute;
+            top: 130%;
+            left: 0;
+            width: 210px;
+            background-color: rgba(43, 41, 41, 0.575);
+            border: 1px solid #3b313179;
+            border-top: none;
+            display: none;
+            box-shadow: 0 2px 4px rgba(168, 166, 166, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            
+        }
+
+        .search-results ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .search-results li {
+            padding: 10px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.37);
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .search-results li:hover {
+            background-color: rgba(255, 0, 0, 0.534);
+        }
+
+        .search-results a {
+            color: #ffffff;
+            text-decoration: none;
+            display: block;
+            font-size: 16px;
+        }
+
+        .menu-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 999;
+        }
+
+        .menu-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(8, 8, 8, 0.452);
+            backdrop-filter: blur(5px);
+            z-index: -1;
+        }
+
+        .menu-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #000;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            z-index: 1000;
+        }
+
+        .menu li {
+            margin-bottom: 7px;
+        }
+
+        .menu li a {
+            text-decoration: none;
+            color: #fff;
+            font-size: 20px;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        .menu li a:hover {
+            color: #e50914;
+        }
+
+        .item {
+            margin: 1px;
+            border-radius: 0;
+        }
+
+        .item-img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+         /* Estilos de la paginación */
+         .pagination {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .pagination button {
+            background-color: #e2232c00;
+            border: none;
+            color: #fff;
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+            margin: 0 5px;
+            border-radius: 5px;
+        }
+
+        .pagination button:hover {
+            background-color: #ff0404;
+            transform: translateY(-3px);
+        }
+
+        .pagination button:focus {
+            outline: none;
+        }
+
+        /* Estilo para el número de página actual */
+        .current-page {
+            color: #e50914;
+            font-weight: bold;
+        }
+
+        /* Estilo para los iconos */
+        .pagination button i {
+            margin-right: 5px;
+        }
+        
+        .total-pages{
+        color: #ffffff;
+            font-weight: bold;
+        }
+    </style>
+    
+</head>
+<body>
+    <!-- Header -->
+    <main>            
+        <div class="content-all">
+            <header class="header">
+                <button class="secciones-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
+                <div class="logo">
+                    <a href="inicio.html"><img src="img/Flixy-logo.gif" alt="Logo de películas"></a>
+                </div>
+                <div class="search-container">
+                    <input type="text" class="search-input" placeholder="Buscar..." id="searchInput">
+                    <i class="fas fa-search search-icon"></i>
+                    <div class="search-results" id="searchResults">
+                        <ul>
+                            <li><a href="series/The Acolyte.html">The Acolyte (serie)</a></li>
+                            <li><a href="series/Yu Yu Hakusho.html">Yu Yu Hakusho (serie)</a></li>
+                            <li><a href="series/El juego del calamar.html">El juego del calamar: El desafío(serie)</a></li>
+                            <li><a href="series/The Boys.html">The Boys (serie)</a></li>
+                            <li><a href="series/Supacell.html">Supacell (serie)</a></li>
+                            <li><a href="series/ONE PIECE.html">One piece (serie)</a></li>
+                            <li><a href="series/La casa del dragón.html">La casa del dragón (serie)</a></li>
+                            <li><a href="series/elite.html">Élite (serie)</a></li>
+                            <li><a href="series/Knuckles.html">Knuckles (serie)</a></li>
+                            <li><a href="series/Estafadores de Tokio.html">Estafadores de Tokio (serie)</a></li>
+                            <li><a href="series/El Decamerón.html">El Decamerón (serie)</a></li>
+                            <li><a href="series/Jerarquía.html">Jerarquía (serie)</a></li>
+                            <li><a href="series/Parasyte Los grises.html">Parasyte Los grises (serie)</a></li>
+                            <li><a href="series/Renegade Nell.html">Renegade Nell</a></li>
+                            <li><a href="series/El problema de los 3 cuerpos.html">El problema de los 3 cuerpos (serie)</a></li>
+                            <li><a href="series/Bandidos.html">Bandidos (serie)</a></li>
+                            <li><a href="series/Ahsoka.html">Ahsoka (serie)</a></li>
+                            <li><a href="series/She-Hulk.html">She-Hulk (serie)</a></li>
+                            <li><a href="series/Superman y Lois.html">Superman y Lois (serie)</a></li>
+                            <li><a href="series/Chucky.html">Chucky (serie)</a></li>
+                            <li><a href="series/La dama del lago.html">La dama del lago (serie)</a></li>
+                            <li><a href="series/Fuimos los afortunados.html">Fuimos los afortunados (serie)</a></li>
+                            <li><a href="series/Doctor Who.html">Doctor Who (serie)</a></li>
+                            <li><a href="series/Fantasmas.html">Fantasmas (serie)</a></li>
+                            <li><a href="series/Asesinato para principiantes.html">Asesinato para principiantes (serie)</a></li>
+                            <li><a href="series/Monarch-el-legado-de-los-monstruos.html"> Monarch: el legado de los monstruos (serie)</a></li>
+                            <li><a href="series/The Chosen (Los elegidos).html">Ahsoka (serie)</a></li>
+
+                        </ul>
+                    </div>
+                </div>
+            </header>
+        </div>
+    </main>
+    <script>
+        function toggleMenu() {
+            document.querySelector('.menu-container').style.display = 'flex';
+        }
+
+        function closeMenu() {
+            document.querySelector('.menu-container').style.display = 'none';
+        }
+
+        const searchInput = document.getElementById('searchInput');
+        const searchResults = document.getElementById('searchResults');
+        const searchItems = searchResults.getElementsByTagName('li');
+
+        searchInput.addEventListener('input', function() {
+            const filter = searchInput.value.toLowerCase();
+            let hasResults = false;
+            if (filter) {
+                for (let i = 0; i < searchItems.length; i++) {
+                    const txtValue = searchItems[i].textContent || searchItems[i].innerText;
+                    if (txtValue.toLowerCase().includes(filter)) {
+                        searchItems[i].style.display = "";
+                        hasResults = true;
+                    } else {
+                        searchItems[i].style.display = "none";
+                    }
+                }
+            } else {
+                for (let i = 0; i < searchItems.length; i++) {
+                    searchItems[i].style.display = "none";
+                }
+            }
+            searchResults.style.display = hasResults ? "block" : "none";
+        });
+
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.search-container')) {
+                searchResults.style.display = "none";
+            }
+        });
+    </script>
+</body>
+</html>
+<!-- Mobile Menu Container -->
+            <div class="menu-container" id="menuContainer">
+                <div class="menu-background" onclick="toggleMenu()"></div>
+                <div class="menu-content">
+                    <ul class="menu">
+                        <li><a href="inicio.html">Inicio</a></li>
+                        <li><a href="Peliculas.html">Películas</a></li>
+                        <li><a href="terror.html">Terror</a></li>
+                        <li><a href="infantil.html">Infantil</a></li>
+                        <li><a href="Series.html">Series</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function toggleMenu() {
+            var menuContainer = document.getElementById("menuContainer");
+            menuContainer.style.display = menuContainer.style.display === "none" || menuContainer.style.display === "" ? "block" : "none";
+        }
+        
+        document.addEventListener("DOMContentLoaded", function() {
+            const searchInput = document.querySelector(".search-input");
+            const searchResults = document.querySelector(".search-results");
+
+            searchInput.addEventListener("input", function() {
+                const inputValue = this.value.toLowerCase().trim();
+                const movieLinks = searchResults.querySelectorAll("a");
+
+                if (inputValue === "") {
+                    searchResults.style.display = "none";
+                    return;
+                }
+
+                movieLinks.forEach(function(link) {
+                    const movieTitle = link.textContent.toLowerCase();
+                    if (movieTitle.includes(inputValue)) {
+                        link.style.display = "block";
+                    } else {
+                        link.style.display = "none";
+                    }
+                });
+
+                searchResults.style.display = "block";
+            });
+
+            document.addEventListener("click", function(e) {
+                if (!searchResults.contains(e.target) && e.target !== searchInput) {
+                    searchResults.style.display = "none";
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+		<div class="container">
+
+           
+            <div class="item">
+				<a href="series/Asesinato para principiantes.html"><img src="Multimedia/Series/Asesinato para principiantes.jpg" alt="" class="item-img"></a>
+			</div>
+            <div class="item">
+				<a href="series/Fantasmas.html"><img src="Multimedia/Series/Fantasmas.jpg" alt="" class="item-img"></a>
+			</div>
+            <div class="item">
+				<a href="series/Doctor Who.html"><img src="Multimedia/Series/Doctor Who.jpg" alt="" class="item-img"></a>
+			</div>
+            <div class="item">
+				<a href="series/Fuimos los afortunados.html"><img src="Multimedia/Series/Fuimos los afortunados.jpg" alt="" class="item-img"></a>
+			</div>
+            <div class="item">
+				<a href="series/La dama del lago.html"><img src="Multimedia/Series/La dama del lago.jpg" alt="" class="item-img"></a>
+			</div>
+            <div class="item">
+				<a href="series/Parasyte Los grises.html"><img src="Multimedia/Series/Parasyte Los grises.jpg" alt="" class="item-img"></a>
+			</div>
+            <div class="item">
+				<a href="series/Jerarquía.html"><img src="Multimedia/Series/Jerarquía.jpg" alt="" class="item-img"></a>
+			</div>
+            <div class="item">
+				<a href="series/El Decamerón.html"><img src="Multimedia/Series/El Decamerón.jpg" alt="" class="item-img"></a>
+			</div>
+            <div class="item">
+				<a href="series/Estafadores de Tokio.html"><img src="Multimedia/Series/Estafadores de Tokio.jpg" alt="" class="item-img"></a>
+			</div>
+            <div class="item">
+				<a href="series/elite.html"><img src="Multimedia/Series/elite.jpg" alt="" class="item-img"></a>
+			</div>
+            <div class="item">
+				<a href="series/La casa del dragón.html"><img src="Multimedia/Series/La casa del dragón.jpg" alt="" class="item-img"></a>
+			</div>
+            <div class="item">
+				<a href="series/Supacell.html"><img src="Multimedia/Series/Supacell.jpg" alt="" class="item-img"></a>
+			</div>
+            <div class="item">
+				<a href="series/ONE PIECE.html"><img src="Multimedia/Series/ONE PIECE.jpg" alt="" class="item-img"></a>
+			</div>
+			<div class="item">
+				<a href="series/The Acolyte.html"><img src="Multimedia/Series/The Acolyte.jpg" alt="" class="item-img"></a>
+			</div>
+            <div class="item">
+				<a href="series/Yu Yu Hakusho.html"><img src="Multimedia/Series/Yu Yu Hakusho.jpg" alt="" class="item-img"></a>
+			</div>
+            <div class="item">
+				<a href="series/El juego del calamar.html"><img src="Multimedia/Series/El juego del calamar El desafío.jpg" alt="" class="item-img"></a>
+			</div>
+            <div class="item">
+				<a href="series/The Boys.html"><img src="Multimedia/Series/The Boys.jpg" alt="" class="item-img"></a>
+			</div>
+            <div class="item">
+				<a href="series/Knuckles.html"><img src="Multimedia/Series/Knuckles.jpg" alt="" class="item-img"></a>
+			</div>
+            <div class="item">
+				<a href="series/Renegade Nell.html"><img src="Multimedia/Series/Renegade Nell.jpg" alt="" class="item-img"></a>
+			</div>
+            <div class="item">
+				<a href="series/El problema de los 3 cuerpos.html"><img src="Multimedia/Series/El problema de los 3 cuerpos.jpg" alt="" class="item-img"></a>
+			</div>
+            <div class="item">
+				<a href="series/Bandidos.html"><img src="Multimedia/Series/Bandidos.jpg" alt="" class="item-img"></a>
+			</div>
+            <div class="item">
+				<a href="series/Ahsoka.html"><img src="Multimedia/Series/Ahsoka.jpg" alt="" class="item-img"></a>
+			</div>
+            <div class="item">
+				<a href="series/She-Hulk.html"><img src="Multimedia/Series/She-Hulk.jpg" alt="" class="item-img"></a>
+			</div>
+            <div class="item">
+				<a href="series/Superman y Lois.html"><img src="Multimedia/Series/Superman y Lois.jpg" alt="" class="item-img"></a>
+			</div>
+            <div class="item">
+				<a href="series/Chucky.html"><img src="Multimedia/Series/Chucky.jpg" alt="" class="item-img"></a>
+			</div>
+            <div class="item">
+				<a href="series/Monarch-el-legado-de-los-monstruos.html"><img src="Multimedia/Series/Monarch el legado de los monstruos.jpg" alt="" class="item-img"></a>
+			</div>
+            <div class="item">
+				<a href="series/The Chosen (Los elegidos).html"><img src="Multimedia/Series/The Chosen (Los elegidos).jpg" alt="" class="item-img"></a>
+			</div>
+		</div> 
+        
+        <!-- Paginación -->
+    <div class="pagination">
+        <button onclick="previousPage()" class="netflix-button"><i class="fas fa-chevron-left"></i> </button>
+        <span class="current-page" id="currentPage">1</span> - <span class="total-pages" id="totalPages">1</span>
+        <button onclick="nextPage()" class="netflix-button"> <i class="fas fa-chevron-right"></i></button>
+    </div>
+
+    <script>
+        let moviesPerPage = 49; // Número de películas por página por defecto
+        let currentPage = 1; // Página actual, inicializada en 1
+
+        // Función para mostrar las películas de la página actual
+        function showMovies(page) {
+            const items = document.querySelectorAll('.item');
+            const startIndex = (page - 1) * moviesPerPage;
+            const endIndex = page * moviesPerPage;
+
+            items.forEach((item, index) => {
+                if (index >= startIndex && index < endIndex) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // Función para ir a la página anterior
+        function previousPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                document.getElementById('currentPage').textContent = currentPage;
+                showMovies(currentPage);
+            }
+        }
+
+        // Función para ir a la página siguiente
+        function nextPage() {
+            const totalMovies = document.querySelectorAll('.item').length;
+            const totalPages = Math.ceil(totalMovies / moviesPerPage);
+
+            if (currentPage < totalPages) {
+                currentPage++;
+                document.getElementById('currentPage').textContent = currentPage;
+                showMovies(currentPage);
+            }
+        }
+
+        // Mostrar las películas de la primera página al cargar la página
+        document.addEventListener('DOMContentLoaded', () => {
+            // Ajustar el número de películas por página en dispositivos móviles
+            if (window.innerWidth <= 768) {
+                moviesPerPage = 52;
+            }
+
+            showMovies(currentPage);
+            const totalMovies = document.querySelectorAll('.item').length;
+            const totalPages = Math.ceil(totalMovies / moviesPerPage);
+            document.getElementById('totalPages').textContent = totalPages;
+        });
+
+        // Reajustar el número de películas por página cuando la ventana cambie de tamaño
+        window.addEventListener('resize', () => {
+            if (window.innerWidth <= 768) {
+                moviesPerPage = 52;
+            } else {
+                moviesPerPage = 40;
+            }
+
+            showMovies(currentPage);
+            const totalMovies = document.querySelectorAll('.item').length;
+            const totalPages = Math.ceil(totalMovies / moviesPerPage);
+            document.getElementById('totalPages').textContent = totalPages;
+        });
+    </script>
+</body>
+</html>
